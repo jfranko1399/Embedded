@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
   FILE *fpt2;
   char *str, *buff;
   int maxVert, maxFace, len, diff, i, j;
-  double **vertices, *tempV, max[3], min[3];
+  double **vertices, *tempV, max[3], min[3], image[256][256];
   double center[3], E, xRad, yRad, zRad, *temp, a;
   int **faces, *tempF;
 
@@ -225,10 +225,11 @@ int main(int argc, char *argv[])
   double camera[3] = {1, 0, 0};
   double up[3] = {0, 0, 1};
   temp = scalarMult(1.5 * E, camera);
-  for (i = 0; i < 3; i++)
-  {
-    camera[i] = temp[i] + center[i];
-  }
+  camera = vectorAdd(temp, center);
+
+  /////////////////////////////////////
+  /// 3D Coordinates Bounding Image ///
+  /////////////////////////////////////
 
   ////////////////////////////////////
   temp = vectorSub(center, camera);

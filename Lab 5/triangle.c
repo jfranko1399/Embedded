@@ -96,7 +96,8 @@ int main(int argc, char *argv[])
   char *str, *buff;
   int maxVert, maxFace, len, diff, i, j, r, c;
   double **vertices, *tempV, max[3], min[3];
-  double center[3], E, xRad, yRad, zRad, *temp, *temp2, a, *image, *rl, *bt, *ic, *abc;
+  double center[3], E, xRad, yRad, zRad;
+  double *temp, *temp2, a, *image, *rl, *bt, *ic, *abc;
   double dot1, dot2, dot3, d, n, zBuffer;
   int **faces, *tempF;
   unsigned char *final;
@@ -126,10 +127,8 @@ int main(int argc, char *argv[])
   len = strlen(str);
 
   strncpy(buff, str + VLEN, len - VLEN - 2);
-  //printf("%d\n", strlen(buff));
 
   maxVert = atoi(buff);
-  //printf("%d\n", vertices);
 
   fgets(str, 100, fpt);
   fgets(str, 100, fpt);
@@ -139,10 +138,8 @@ int main(int argc, char *argv[])
   len = strlen(str);
 
   strncpy(buff, str + FLEN, len - FLEN - 2);
-  //printf("%d\n", strlen(buff));
 
   maxFace = atoi(buff);
-  //printf("%d\n", faces);
 
   ///////////////////////////////
   /// Read Vertices and Faces ///
@@ -166,11 +163,9 @@ int main(int argc, char *argv[])
     fgets(str, 100, fpt);
 
     vertices[i][0] = strtod(strtok(str, " "), NULL);
-    //printf("%f ", vertices[i][0]);
     for (j = 1; j < 3; j++)
     {
       vertices[i][j] = strtod(strtok(NULL, " "), NULL);
-      //printf("%f ", vertices[i][j]);
     }
 
     for (j = 0; j < 3; j++)
@@ -184,19 +179,7 @@ int main(int argc, char *argv[])
         min[j] = vertices[i][j];
       }
     }
-    //printf("\n");
   }
-
-  // for (i = 0; i < 3; i++)
-  // {
-  //   printf("%f ", max[i]);
-  // }
-  // printf("\n");
-  // for (i = 0; i < 3; i++)
-  // {
-  //   printf("%f ", min[i]);
-  // }
-  // printf("\n");
 
   center[0] = (max[0] + min[0])/2;
   center[1] = (max[1] + min[1])/2;
@@ -216,13 +199,10 @@ int main(int argc, char *argv[])
     fgets(str, 100, fpt);
 
     faces[i][0] = atoi(strtok(str, " "));
-    //printf("%d ", faces[i][0]);
     for (j = 1; j < 4; j++)
     {
       faces[i][j] = atoi(strtok(NULL, " "));
-      //printf("%d ", faces[i][j]);
     }
-    //printf("\n");
   }
 
   ////////////////////////////
@@ -232,10 +212,6 @@ int main(int argc, char *argv[])
   xRad = strtod(argv[2], NULL) * (M_PI/180);
   yRad = strtod(argv[3], NULL) * (M_PI/180);
   zRad = strtod(argv[4], NULL) * (M_PI/180);
-
-  // double Rx[3][3] = {{1, 0, 0}, {0, cos(xRad), -sin(xRad)}, {0, sin(xRad), cos(xRad)}};
-  // double Ry[3][3] = {{cos(yRad), 0, sin(yRad)}, {0, 1, 0}, {-sin(yRad), 0, cos(yRad)}};
-  // double Rz[3][3] = {{cos(zRad), -sin(zRad), 0}, {sin(zRad), cos(zRad), 0}, {0, 0, 1}};
 
   double **Rx = (double **)calloc(3, sizeof(double *));
   double **Ry = (double **)calloc(3, sizeof(double *));
@@ -257,7 +233,6 @@ int main(int argc, char *argv[])
     Rx[i] = tx[i];
     Ry[i] = ty[i];
     Rz[i] = tz[i];
-    //printf("%lf\n", Rx[i]);
   }
 
   double *camera = (double *)calloc(3, sizeof(double));
@@ -271,27 +246,6 @@ int main(int argc, char *argv[])
 
   temp = (double *)calloc(3, sizeof(double));
   temp2 = (double *)calloc(3, sizeof(double));
-  // for (i = 0; i < 3; i++)
-  // {
-  //   temp[i] = camera[0]*Rx[0][i] + camera[1]*Rx[1][i] + camera[2]*Rx[2][i];
-  //   temp2[i] = up[0]*Rx[0][i] + up[1]*Rx[1][i] + up[2]*Rx[2][i];
-  // }
-  // for (i = 0; i < 3; i++)
-  // {
-  //   temp[i] = camera[0]*Ry[0][i] + camera[1]*Ry[1][i] + camera[2]*Ry[2][i];
-  //   temp2[i] = up[0]*Ry[0][i] + up[1]*Ry[1][i] + up[2]*Ry[2][i];
-  // }
-  // for (i = 0; i < 3; i++)
-  // {
-  //   temp[i] = camera[0]*Rz[0][i] + camera[1]*Rz[1][i] + camera[2]*Rz[2][i];
-  //   temp2[i] = up[0]*Rz[0][i] + up[1]*Rz[1][i] + up[2]*Rz[2][i];
-  // }
-
-  // for (i = 0; i < 3; i++)
-  // {
-  //   camera[i] = temp[i];
-  //   up[i] = temp2[i];
-  // }
 
   camera = cameraRot(camera, Rx);
   camera = cameraRot(camera, Ry);
@@ -302,11 +256,10 @@ int main(int argc, char *argv[])
   up = cameraRot(up, Rz);
 
   printf("%lf %lf %lf\n", camera[0], camera[1], camera[2]);
+  printf("%lf %lf %lf\n", up[0], up[1], up[2]);
 
   temp = scalarMult(1.5 * E, camera);
-  //printf("%lf\n", 1.5 * E);
   camera = vectorAdd(temp, center);
-  //printf("camera: %lf %lf %lf\n", camera[0], camera[1], camera[2]);
 
   /////////////////////////////////////
   /// 3D Coordinates Bounding Image ///
@@ -355,7 +308,7 @@ int main(int argc, char *argv[])
   abc = (double *)calloc(3, sizeof(double));
 
   final = (unsigned char *)calloc(256*256, sizeof(unsigned char));
-  //printf("Rendering...\n");
+  printf("Rendering...\n");
   for (r = 0; r < 256; r++)
   {
     for (c = 0; c < 256; c++)
@@ -371,10 +324,6 @@ int main(int argc, char *argv[])
 
       image = vectorAdd(topLeft, rl);
       image = vectorAdd(image, bt);
-
-      // printf("rl: %lf %lf %lf\n", rl[0], rl[1], rl[2]);
-      // printf("bt: %lf %lf %lf\n", bt[0], bt[1], bt[2]);
-      // printf("image: %lf %lf %lf\n", image[0], image[1], image[2]);
 
       for (i = 0; i < maxFace; i++)
       {
@@ -413,9 +362,9 @@ int main(int argc, char *argv[])
         }
       }
     }
-    //printf("%d \n", r);
+    printf("%d \n", r);
   }
-  //printf("\n");
+  printf("\n");
 
   fpt2 = fopen("output.ppm", "wb");
   fprintf(fpt2, "P5 256 256 255\n");

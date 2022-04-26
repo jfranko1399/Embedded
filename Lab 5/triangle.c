@@ -8,11 +8,11 @@
 #define FLEN 13
 
 double *cameraRot(double *cu, double **r);
-double *scalarMult(double scalar, double *array);
+void scalarMult(double scalar, double *array);
 double dotProd(double *A, double *B);
-double *crossProd(double *A, double *B);
-double *vectorAdd(double *A, double *B);
-double *vectorSub(double *A, double *B);
+void crossProd(double *A, double *B, double *out);
+void vectorAdd(double *A, double *B, double *out);
+void vectorSub(double *A, double *B, double *out);
 
 double *cameraRot(double *cu, double **r)
 {
@@ -26,17 +26,17 @@ double *cameraRot(double *cu, double **r)
   return result;
 }
 
-double *scalarMult(double scalar, double *array)
+void scalarMult(double scalar, double *array)
 {
-  double *result = (double *)calloc(3, sizeof(double));
+  //double *result = (double *)calloc(3, sizeof(double));
   int i;
 
   for (i = 0; i < 3; i++)
   {
-    result[i] = scalar * array[i];
+    array[i] = scalar * array[i];
   }
 
-  return result;
+  //return result;
 }
 
 double dotProd(double *A, double *B)
@@ -52,41 +52,41 @@ double dotProd(double *A, double *B)
   return result;
 }
 
-double *crossProd(double *A, double *B)
+void crossProd(double *A, double *B, double *out)
 {
-  double *result = (double *)calloc(3, sizeof(double));
+  //double *result = (double *)calloc(3, sizeof(double));
 
-  result[0] = (A[1] * B[2]) - (A[2] * B[1]);
-  result[1] = (A[2] * B[0]) - (A[0] * B[2]);
-  result[2] = (A[0] * B[1]) - (A[1] * B[0]);
+  out[0] = (A[1] * B[2]) - (A[2] * B[1]);
+  out[1] = (A[2] * B[0]) - (A[0] * B[2]);
+  out[2] = (A[0] * B[1]) - (A[1] * B[0]);
 
-  return result;
+  //return result;
 }
 
-double *vectorAdd(double *A, double *B)
+void vectorAdd(double *A, double *B, double *out)
 {
-  double *result = (double *)calloc(3, sizeof(double));
+  //double *result = (double *)calloc(3, sizeof(double));
   int i;
 
   for (i = 0; i < 3; i++)
   {
-    result[i] = A[i] + B[i];
+    out[i] = A[i] + B[i];
   }
 
-  return result;
+  //return result;
 }
 
-double *vectorSub(double *A, double *B)
+void vectorSub(double *A, double *B, double *out)
 {
-  double *result = (double *)calloc(3, sizeof(double));
+  //double *result = (double *)calloc(3, sizeof(double));
   int i;
 
   for (i = 0; i < 3; i++)
   {
-    result[i] = A[i] - B[i];
+    out[i] = A[i] - B[i];
   }
 
-  return result;
+  //return result;
 }
 
 int main(int argc, char *argv[])
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
   int maxVert, maxFace, len, diff, i, j, r, c;
   double **vertices, *tempV, max[3], min[3];
   double center[3], E, xRad, yRad, zRad;
-  double *temp, *temp2, a, *image, *rl, *bt, *ic, *abc;
+  double *temp, *temp2, *temp3, *temp4, *temp5, *temp6, a, *image, *rl, *bt, *ic, *abc;
   double dot1, dot2, dot3, d, n, zBuffer;
   int **faces, *tempF;
   unsigned char *final;
@@ -246,6 +246,11 @@ int main(int argc, char *argv[])
 
   temp = (double *)calloc(3, sizeof(double));
   temp2 = (double *)calloc(3, sizeof(double));
+  temp3 = (double *)calloc(3, sizeof(double));
+  temp4 = (double *)calloc(3, sizeof(double));
+  temp5 = (double *)calloc(3, sizeof(double));
+  temp6 = (double *)calloc(3, sizeof(double));
+  image = (double *)calloc(3, sizeof(double));
 
   camera = cameraRot(camera, Rx);
   camera = cameraRot(camera, Ry);
@@ -255,19 +260,21 @@ int main(int argc, char *argv[])
   up = cameraRot(up, Ry);
   up = cameraRot(up, Rz);
 
-  printf("%lf %lf %lf\n", camera[0], camera[1], camera[2]);
-  printf("%lf %lf %lf\n", up[0], up[1], up[2]);
+  //printf("%lf %lf %lf\n", camera[0], camera[1], camera[2]);
+  //printf("%lf %lf %lf\n", up[0], up[1], up[2]);
 
-  temp = scalarMult(1.5 * E, camera);
-  camera = vectorAdd(temp, center);
+  scalarMult(1.5 * E, camera);
+  vectorAdd(camera, center, camera);
+  //printf("%lf %lf %lf\n", camera[0], camera[1], camera[2]);
 
   /////////////////////////////////////
   /// 3D Coordinates Bounding Image ///
   /////////////////////////////////////
 
   ////////////////////////////////////
-  temp = vectorSub(center, camera);
-  double* left = crossProd(up, temp);
+  vectorSub(center, camera, temp);
+  double* left = (double *)calloc(3, sizeof(double));
+  crossProd(up, temp, left);
   //printf("left: %lf %lf %lf\n", left[0], left[1], left[2]);
   ////////////////////////////////////
   a = 0;
@@ -278,28 +285,32 @@ int main(int argc, char *argv[])
   a = sqrt(a);
   //printf("a: %lf\n", a);
   ////////////////////////////////////
-  temp = scalarMult(E/(2 * a), left);
-  left = vectorAdd(temp, center);
+  scalarMult(E/(2 * a), left);
+  vectorAdd(left, center, left);
   //printf("left: %lf %lf %lf\n", left[0], left[1], left[2]);
   ////////////////////////////////////
-  temp = vectorSub(center, camera);
-  double *right = crossProd(temp, up);
+  vectorSub(center, camera, temp);
+  double *right = (double *)calloc(3, sizeof(double));
+  crossProd(temp, up, right);
   //printf("right: %lf %lf %lf\n", right[0], right[1], right[2]);
   ////////////////////////////////////
-  temp = scalarMult(E/(2 * a), right);
-  right = vectorAdd(temp, center);
+  scalarMult(E/(2 * a), right);
+  vectorAdd(right, center, right);
   //printf("right: %lf %lf %lf\n", right[0], right[1], right[2]);
   ////////////////////////////////////
-  temp = scalarMult(E/2, up);
-  double *top = vectorAdd(temp, center);
+  scalarMult(E/2, up);
+  double *top = (double *)calloc(3, sizeof(double));
+  vectorAdd(up, center, top);
   //printf("top: %lf %lf %lf\n", top[0], top[1], top[2]);
   ////////////////////////////////////
-  temp = scalarMult(-E/2, up);
-  double *bottom = vectorAdd(temp, center);
+  scalarMult(-1.0, up);
+  double *bottom = (double *)calloc(3, sizeof(double));
+  vectorAdd(up, center, bottom);
   //printf("bottom: %lf %lf %lf\n", bottom[0], bottom[1], bottom[2]);
   ////////////////////////////////////
-  temp = scalarMult(E/2, up);
-  double *topLeft = vectorAdd(temp, left);
+  scalarMult(-1.0, up);
+  double *topLeft = (double *)calloc(3, sizeof(double));
+  vectorAdd(up, left, topLeft);
   //printf("topLeft: %lf %lf %lf\n", topLeft[0], topLeft[1], topLeft[2]);
 
   rl = (double *)calloc(3, sizeof(double));
@@ -316,41 +327,69 @@ int main(int argc, char *argv[])
       final[r * 256 + c] = 0;
       zBuffer = 999999;
 
-      rl = vectorSub(right, left);
-      rl = scalarMult((double)c/(256 - 1), rl);
+      vectorSub(right, left, rl);
+      scalarMult((double)c/(256 - 1), rl);
 
-      bt = vectorSub(bottom, top);
-      bt = scalarMult((double)r/(256 - 1), bt);
+      vectorSub(bottom, top, bt);
+      scalarMult((double)r/(256 - 1), bt);
 
-      image = vectorAdd(topLeft, rl);
-      image = vectorAdd(image, bt);
+      vectorAdd(topLeft, rl, image);
+      vectorAdd(image, bt, image);
 
       for (i = 0; i < maxFace; i++)
       {
-        rl = vectorSub(vertices[faces[i][2]], vertices[faces[i][1]]);
-        bt = vectorSub(vertices[faces[i][3]], vertices[faces[i][1]]);
-        abc = crossProd(rl, bt);
+        vectorSub(vertices[faces[i][2]], vertices[faces[i][1]], rl);
+        vectorSub(vertices[faces[i][3]], vertices[faces[i][1]], bt);
+        crossProd(rl, bt, abc);
 
         d = -dotProd(abc, vertices[faces[i][1]]);
 
         n = -dotProd(abc, camera) - d;
-        ic = vectorSub(image, camera);
+        vectorSub(image, camera, ic);
         d = dotProd(abc, ic);
 
         if (d > .1)
         {
-          temp = scalarMult(n/d, ic);
-          ic = vectorAdd(camera, temp);
+          scalarMult(n/d, ic);
+          vectorAdd(camera, ic, ic);
 
-          dot1 = dotProd(crossProd(vectorSub(vertices[faces[i][3]], vertices[faces[i][1]]), vectorSub(vertices[faces[i][2]], vertices[faces[i][1]])), crossProd(vectorSub(ic, vertices[faces[i][1]]), vectorSub(vertices[faces[i][2]], vertices[faces[i][1]])));
+          vectorSub(vertices[faces[i][3]], vertices[faces[i][1]], temp);
+          vectorSub(vertices[faces[i][2]], vertices[faces[i][1]], temp2);
+          vectorSub(ic, vertices[faces[i][1]], temp3);
+          vectorSub(vertices[faces[i][2]], vertices[faces[i][1]], temp4);
+          crossProd(temp, temp2, temp5);
+          crossProd(temp3, temp4, temp6);
+          dot1 = dotProd(temp5, temp6);
+          // printf("dot1: %lf\n", dot1);
+          // if (c == 1)
+          // {
+          //   exit(0);
+          // }
           if (dot1 >= 0)
           {
-            dot2 = dotProd(crossProd(vectorSub(vertices[faces[i][1]], vertices[faces[i][2]]), vectorSub(vertices[faces[i][3]], vertices[faces[i][2]])), crossProd(vectorSub(ic, vertices[faces[i][2]]), vectorSub(vertices[faces[i][3]], vertices[faces[i][2]])));
+            vectorSub(vertices[faces[i][1]], vertices[faces[i][2]], temp);
+            vectorSub(vertices[faces[i][3]], vertices[faces[i][2]], temp2);
+            vectorSub(ic, vertices[faces[i][2]], temp3);
+            vectorSub(vertices[faces[i][3]], vertices[faces[i][2]], temp4);
+            crossProd(temp, temp2, temp5);
+            crossProd(temp3, temp4, temp6);
+            //dot2 = dotProd(crossProd(vectorSub(vertices[faces[i][1]], vertices[faces[i][2]]), vectorSub(vertices[faces[i][3]], vertices[faces[i][2]])), crossProd(vectorSub(ic, vertices[faces[i][2]]), vectorSub(vertices[faces[i][3]], vertices[faces[i][2]])));
+            dot2 = dotProd(temp5, temp6);
+            //printf("dot2: %lf\n", dot2);
             if (dot2 >= 0)
             {
-              dot3 = dotProd(crossProd(vectorSub(vertices[faces[i][2]], vertices[faces[i][3]]), vectorSub(vertices[faces[i][1]], vertices[faces[i][3]])), crossProd(vectorSub(ic, vertices[faces[i][3]]), vectorSub(vertices[faces[i][1]], vertices[faces[i][3]])));
+              vectorSub(vertices[faces[i][2]], vertices[faces[i][3]], temp);
+              vectorSub(vertices[faces[i][1]], vertices[faces[i][3]], temp2);
+              vectorSub(ic, vertices[faces[i][3]], temp3);
+              vectorSub(vertices[faces[i][1]], vertices[faces[i][3]], temp4);
+              crossProd(temp, temp2, temp5);
+              crossProd(temp3, temp4, temp6);
+              //dot3 = dotProd(crossProd(vectorSub(vertices[faces[i][2]], vertices[faces[i][3]]), vectorSub(vertices[faces[i][1]], vertices[faces[i][3]])), crossProd(vectorSub(ic, vertices[faces[i][3]]), vectorSub(vertices[faces[i][1]], vertices[faces[i][3]])));
+              dot3 = dotProd(temp5, temp6);
+              //printf("dot3: %lf\n", dot3);
               if (dot3 >= 0)
               {
+                //printf("dick\n");
                 if (((n/d) <= zBuffer))
                 {
                   final[r * 256 + c] = 155 + (i % 100);
@@ -362,7 +401,7 @@ int main(int argc, char *argv[])
         }
       }
     }
-    printf("%d \n", r);
+    printf("%d ", r);
   }
   printf("\n");
 

@@ -182,7 +182,7 @@ int main(int argc,char *argv[]) {
         camera[i] = mTemp[i];
         up[i] = mTemp2[i];
     }
-    pmat(camera);
+    //pmat(camera);
 
     sca_mult(1.5*e,camera);
     mat_add(camera,mCenter,1,mTemp);
@@ -210,7 +210,7 @@ int main(int argc,char *argv[]) {
     //pmat(topleft);
     sca_mult(-1.0,mTemp);
     mat_add(mTemp,mCenter,1,bottom);
-    //pmat(bottom);
+    pmat(bottom);
 
     // Do the image thing
     for(i=0;i<ROWS;i++) {
@@ -249,6 +249,11 @@ int main(int argc,char *argv[]) {
                         mat_add(isec,verts[faces[k][(l)%3]],-1,mTemp);
                         mat_crx(mTemp,v10,mTemp4);
                         dot[l] = mat_dot(mTemp3,mTemp4);
+                        // printf("dot: %lf\n", dot[l]);
+                        // if (j == 1)
+                        // {
+                        //   exit(0);
+                        // }
                         if (dot[l] < 0) {skip = 1;break;}
                     }
                     if (skip != 1  && ((n/d) <= zbuff)) {

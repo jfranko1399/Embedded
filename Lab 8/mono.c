@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define tolerance 0.000001
+#define tolerance 0.1
 
 void main(int argc, char *argv[])
 {
@@ -12,7 +12,6 @@ void main(int argc, char *argv[])
   double io[] = {.3, .3, .3, .2, .2, .2, 0, 0};
   double disk[] = {3, 3, 3, 3, 3, 3, 0, 0};
   double compare = 0, overhead = .153;
-  double min = 0, max = 0;
   int i, k, l, j;
   bool flag = false;
 
@@ -32,11 +31,7 @@ void main(int argc, char *argv[])
         }
         compare += (r[i-1] + b[i-1]);
 
-        min = (l * period[k-1] - tolerance);
-        max = (l * period[k-1] + tolerance);
-        //printf("min: %lf max: %lf\n", compare - min, max - compare);
-        //printf("abs: %lf\n", abs(compare - l * period[k-1]));
-        if ((abs(compare - (l * period[k-1])) <= tolerance) || (compare <= (l * period[k-1])))
+        if (((compare <= (double)(l * period[k-1] + (double)tolerance)) && (compare >= (double)(l * period[k-1] - (double)tolerance))) || (compare <= (l * period[k-1])))
         {
           flag = true;
           printf("i: %d   k: %d   l: %d\n", i, k, l);
@@ -52,6 +47,3 @@ void main(int argc, char *argv[])
     }
   }
 }
-
-//((compare <= (l * period[k-1] + tolerance)) && (compare >= (l * period[k-1] - tolerance)))
-//(abs(compare - (l * period[k-1])) <= tolerance)
